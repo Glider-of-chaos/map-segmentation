@@ -234,14 +234,14 @@ class GeoLine:
 #        line1_lat_start + lon*slope1 - line1_lon_start*slope1 = line2_lat_start + lon*slope2 - line2_lon_start*slope2
 #        lon(slope1-slope2) = line2_lat_start -line1_lat_start - line2_lon_start*slope2 + line1_lon_start*slope1
         
+if __name__ == '__main__':        
+    sections_dict = {}
+    with open("E:\Downloads\Programming\map\sections.csv", newline='') as csvfile:
+        csvreader = csv.reader(csvfile, delimiter=',', quotechar='"')
+        for row in csvreader:
+            key = '-'.join((row[2], row[3]))
+            sections_dict[key] = row[0]
         
-sections_dict = {}
-with open("E:\Downloads\Programming\map\sections.csv", newline='') as csvfile:
-    csvreader = csv.reader(csvfile, delimiter=',', quotechar='"')
-    for row in csvreader:
-        key = '-'.join((row[2], row[3]))
-        sections_dict[key] = row[0]
-        
-with open("E:\Downloads\Programming\map\dp_view_01.csv", newline='') as csvfile:
-    csvreader = csv.reader(csvfile, delimiter=',', quotechar='"')
-    for row in csvreader:
+    with open("E:\Downloads\Programming\map\dp_view_01.csv", newline='') as csvfile:
+        csvreader = csv.reader(csvfile, delimiter=',', quotechar='"')
+        #for row in csvreader:
