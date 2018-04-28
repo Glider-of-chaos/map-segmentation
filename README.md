@@ -3,7 +3,8 @@
 The goal is to parse the lines csv file to map line ids to map section ids. Map sections are roughly rectangular and are based on just adding 0.01 incriments to latitude and longitude. Relevant sections are provided in the csv file as well
 
 **lines csv file format:**
-"line_id";"start_latitude";"start_longitude";"end_latitude";"end_longitude"
+"line_id","start_latitude","start_longitude","end_latitude","end_longitude"
+
 **sections csv file format:**
 "section_id","max_latitude","min_latitude","min_longitude","max_longitude"
 
