@@ -42,3 +42,8 @@ class TestMapSegmentation(unittest.TestCase):
         g_line = GeoLine((30.2555953, 59.9647746), (30.2555953,59.9647745))
         g_line_str = g_line.__str__()
         self.assertEqual(g_line_str, "((30.2555953, 59.9647745), (30.2555953, 59.9647746))")
+
+    def test_find_sections_complex(self):
+        g_line = GeoLine((0.0265972,0.0135786), (-0.0175864,-0.0044862))
+        g_line_sections = g_line.find_sections()
+        self.assertEqual(g_line_sections, [(-0.02, -0.01), (-0.01, -0.01), (-0.01, 0.0), (0.0, 0.0), (0.01, 0.0), (0.01, 0.01), (0.02, 0.01)])

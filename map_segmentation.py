@@ -115,7 +115,6 @@ class GeoLine:
         if  point_lat >= self.start[0] and point_lat <= self.end[0] and point_lon >= self.start[1] and point_lon <= self.end[1]:
             if point_lat == line1_lat_start + point_lon * (line1_lon_end - line1_lon_start)/(line1_lat_end - line1_lat_start):
                 return True
-        print ( line1_lat_start + point_lon * (line1_lon_end - line1_lon_start)/(line1_lat_end - line1_lat_start) )
         return False
         
     def lat(self,lon):
@@ -163,22 +162,26 @@ class GeoLine:
             lat = line.lat(lon)
             #except ZeroDivisionError:
                 #lon = line2_lon_start
-            return (line1_lat_start <= lat and line1_lat_end >= lat)
+            return (round(line1_lat_start, 12) <= round(lat, 12) and round(line1_lat_end, 12) >= round(lat, 12))
             
         elif line2_lon_const:
-            lon = line2_lat_start
+            lon = line2_lon_start
             #try:
             lat = self.lat(lon)
             #except ZeroDivisionError:
             #    lon = line1_lon_start
-            return (line2_lat_start <= lat and line2_lat_end >= lat)
+            return (round(line2_lat_start, 12) <= round(lat, 12) and round(line2_lat_end, 12) >= round(lat, 12))
             
         else:
             lon = (line2_lat_start -line1_lat_start - line2_lon_start*slope2 + line1_lon_start*slope1)/(slope1-slope2)
                 
             lat= line1_lat_start + (lon - line1_lon_start) * slope1
-        
-        return (line2_lat_start <= lat and line2_lat_end >= lat and line1_lat_start <= lat and line1_lat_end >= lat)
+            
+        return (round(line2_lat_start, 12) <= round(lat, 12) and round(line2_lat_end, 12) >= round(lat, 12) and
+                round(line1_lat_start, 12) <= round(lat, 12) and round(line1_lat_end, 12) >= round(lat, 12)
+                and
+                round(line2_lon_start, 12) <= round(lon, 12) and round(line2_lon_end, 12) >= round(lon, 12) and
+                round(line1_lon_start, 12) <= round(lon, 12) and round(line1_lon_end, 12) >= round(lon, 12))
         
             
     def find_sections(self):
@@ -212,15 +215,10 @@ class GeoLine:
                         lat_crossed = self.intersects(crossing_lat)
                         lon_crossed = self.intersects(crossing_lon)
                         
-                        print("section: {0}:".format(section_node))
-                        print("lat line: {0}, \tcrossed: {1}".format(crossing_lat, lat_crossed))
-                        print("lon line: {0}, \tcrossed: {1}".format(crossing_lon, lon_crossed))
-                        
                         if lat_crossed or lon_crossed:
                             sections.append(section_node)
                             
         return sections
-        
 
 
             
