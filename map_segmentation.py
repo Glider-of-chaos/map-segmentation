@@ -95,9 +95,10 @@ class GeoLine:
         line1_lon_end = self.end[1]
 
         # may be should've done try/except? does not seem to do much
-        #try:
-        slope = (line1_lat_end - line1_lat_start)/(line1_lon_end - line1_lon_start)
-        #except ZeroDivisionError:
+        try:
+            slope = (line1_lat_end - line1_lat_start)/(line1_lon_end - line1_lon_start)
+        except ZeroDivisionError:
+            slope = math.nan
 
         return slope
         
@@ -137,17 +138,13 @@ class GeoLine:
         
         line1_lon_const = False
         line2_lon_const = False
-        slope1 = float('nan')
-        slope2 = float('nan')
         
-        try:
-            slope1 = self.slope()
-        except ZeroDivisionError:
+        slope1 = self.slope()
+        if math.isnan(slope1):
             line1_lon_const = True
             
-        try:
-            slope2 = line.slope()
-        except ZeroDivisionError: 
+        slope2 = line.slope()
+        if math.isnan(slope2):
             line2_lon_const = True
             
         if (line1_lon_const and line2_lon_const) or (slope1 == slope2):
@@ -176,12 +173,22 @@ class GeoLine:
             lon = (line2_lat_start -line1_lat_start - line2_lon_start*slope2 + line1_lon_start*slope1)/(slope1-slope2)
                 
             lat= line1_lat_start + (lon - line1_lon_start) * slope1
+
+        line1_lat_min = min(line1_lat_start, line1_lat_end)
+        line1_lat_max = max(line1_lat_start, line1_lat_end)
+        line1_lon_min = min(line1_lon_start, line1_lon_end)
+        line1_lon_max = max(line1_lon_start, line1_lon_end)
+        
+        line2_lat_min = min(line2_lat_start, line2_lat_end)
+        line2_lat_max = max(line2_lat_start, line2_lat_end)
+        line2_lon_min = min(line2_lon_start, line2_lon_end)
+        line2_lon_max = max(line2_lon_start, line2_lon_end)
             
-        return (round(line2_lat_start, 12) <= round(lat, 12) and round(line2_lat_end, 12) >= round(lat, 12) and
-                round(line1_lat_start, 12) <= round(lat, 12) and round(line1_lat_end, 12) >= round(lat, 12)
+        return (round(line2_lat_min, 12) <= round(lat, 12) and round(line2_lat_max, 12) >= round(lat, 12) and
+                round(line1_lat_min, 12) <= round(lat, 12) and round(line1_lat_max, 12) >= round(lat, 12)
                 and
-                round(line2_lon_start, 12) <= round(lon, 12) and round(line2_lon_end, 12) >= round(lon, 12) and
-                round(line1_lon_start, 12) <= round(lon, 12) and round(line1_lon_end, 12) >= round(lon, 12))
+                round(line2_lon_min, 12) <= round(lon, 12) and round(line2_lon_max, 12) >= round(lon, 12) and
+                round(line1_lon_min, 12) <= round(lon, 12) and round(line1_lon_max, 12) >= round(lon, 12))
         
             
     def find_sections(self):
@@ -208,9 +215,9 @@ class GeoLine:
                     section_node = (round(rounded_lat_start + 0.01*i, 2), round(rounded_lon_start + 0.01*j, 2))
                     if (section_node) not in sections:
                         crossing_lat = GeoLine((rounded_lat_start + 0.01*i, rounded_lon_start + 0.01*j),
-                        (rounded_lat_start + 0.01*(i+1), rounded_lon_start + 0.01*j))
+                                                (rounded_lat_start + 0.01*(i+1), rounded_lon_start + 0.01*j))
                         crossing_lon = GeoLine((rounded_lat_start + 0.01*i, rounded_lon_start + 0.01*j),
-                        (rounded_lat_start + 0.01*i, rounded_lon_start + 0.01*(j + 1)))
+                                                (rounded_lat_start + 0.01*i, rounded_lon_start + 0.01*(j + 1)))
                         
                         lat_crossed = self.intersects(crossing_lat)
                         lon_crossed = self.intersects(crossing_lon)
