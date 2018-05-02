@@ -21,69 +21,45 @@ class GeoLine:
     def __str__(self):
         return (self.start, self.end).__str__()
                 
-    def ray_intersection_point(self, line):
+    def ray_intersection(self, line):
         line1_lat_start = self.start[0]
         line1_lon_start = self.start[1]
-
         line1_lat_end = self.end[0]
         line1_lon_end = self.end[1]
 
         line2_lat_start = line.start[0]
         line2_lon_start = line.start[1]
-
         line2_lat_end = line.end[0]
         line2_lon_end = line.end[1]
         
         line1_lon_const = False
         line2_lon_const = False
-        slope1 = float('nan')
-        slope2 = float('nan')
         
-        try:
-            slope1 = self.slope()
-        except ZeroDivisionError:
+        slope1 = self.slope()
+        if math.isnan(slope1):
             line1_lon_const = True
             
-        try:
-            slope2 = line.slope()
-        except ZeroDivisionError: 
+        slope2 = line.slope()
+        if math.isnan(slope2):
             line2_lon_const = True
             
         if (line1_lon_const and line2_lon_const) or (slope1 == slope2):
             if line1_lat_start == line2_lat_start:
                 return self
             else:
-                return float('nan')
+                return math.nan
         
-        if line1_lon_const:
+        elif line1_lon_const:
             lon = line1_lon_start
-            #try:
             lat = line.lat(lon)
-            #except ZeroDivisionError:
-                #lon = line2_lon_start
-            return (lat, lon)
             
-        if line2_lon_const:
-            lon = line2_lat_start
-            #try:
+        elif line2_lon_const:
+            lon = line2_lon_start
             lat = self.lat(lon)
-            #except ZeroDivisionError:
-            #    lon = line1_lon_start
-            return (lat, lon)
             
-#    lat= line1_lat_start + (lon - line1_lon_start) * slope1
-#    lat= line2_lat_start + (lon - line2_lon_start) * slope2
-        
-#        lon = (line2_lat_start - line1_lat_start) / \
-#            ( (line1_lon_end - line1_lon_start)/(line1_lat_end - line1_lat_start) -\
-#            (line2_lon_end - line2_lon_start)/(line2_lat_end - line2_lat_start) )
-
-#        line1_lat_start + lon*slope1 - line1_lon_start*slope1 = line2_lat_start + lon*slope2 - line2_lon_start*slope2
-#        lon(slope1-slope2) = line2_lat_start -line1_lat_start - line2_lon_start*slope2 + line1_lon_start*slope1
-        
-        lon = (line2_lat_start -line1_lat_start - line2_lon_start*slope2 + line1_lon_start*slope1)/(slope1-slope2)
-            
-        lat= line1_lat_start + (lon - line1_lon_start) * slope1
+        else:
+            lon = (line2_lat_start -line1_lat_start - line2_lon_start*slope2 + line1_lon_start*slope1)/(slope1-slope2)
+            lat= line1_lat_start + (lon - line1_lon_start) * slope1
         
         return (lat, lon)
         
@@ -94,7 +70,6 @@ class GeoLine:
         line1_lat_end = self.end[0]
         line1_lon_end = self.end[1]
 
-        # may be should've done try/except? does not seem to do much
         try:
             slope = (line1_lat_end - line1_lat_start)/(line1_lon_end - line1_lon_start)
         except ZeroDivisionError:
@@ -124,72 +99,38 @@ class GeoLine:
         return lat
         
     def intersects(self, line):
-        line1_lat_start = self.start[0]
-        line1_lon_start = self.start[1]
-
-        line1_lat_end = self.end[0]
-        line1_lon_end = self.end[1]
-
-        line2_lat_start = line.start[0]
-        line2_lon_start = line.start[1]
-
-        line2_lat_end = line.end[0]
-        line2_lon_end = line.end[1]
+        line1_lat_min = round(min(self.start[0], self.end[0]), 12)
+        line1_lat_max = round(max(self.start[0], self.end[0]), 12)
+        line1_lon_min = round(min(self.start[1], self.end[1]), 12)
+        line1_lon_max = round(max(self.start[1], self.end[1]), 12)
         
-        line1_lon_const = False
-        line2_lon_const = False
-        
-        slope1 = self.slope()
-        if math.isnan(slope1):
-            line1_lon_const = True
-            
-        slope2 = line.slope()
-        if math.isnan(slope2):
-            line2_lon_const = True
-            
-        if (line1_lon_const and line2_lon_const) or (slope1 == slope2):
-            if line1_lat_start == line2_lat_start:
-                return true
-            else:
+        line2_lat_min = round(min(line.start[0], line.end[0]), 12)
+        line2_lat_max = round(max(line.start[0], line.end[0]), 12)
+        line2_lon_min = round(min(line.start[1], line.end[1]), 12)
+        line2_lon_max = round(max(line.start[1], line.end[1]), 12)
+
+        ray_intersection_point = self.ray_intersection(line)
+
+        if isinstance(ray_intersection_point, float):
+            if math.isnan(ray_intersection_point):
                 return false
-        
-        elif line1_lon_const:
-            lon = line1_lon_start
-            #try:
-            lat = line.lat(lon)
-            #except ZeroDivisionError:
-                #lon = line2_lon_start
-            return (round(line1_lat_start, 12) <= round(lat, 12) and round(line1_lat_end, 12) >= round(lat, 12))
-            
-        elif line2_lon_const:
-            lon = line2_lon_start
-            #try:
-            lat = self.lat(lon)
-            #except ZeroDivisionError:
-            #    lon = line1_lon_start
-            return (round(line2_lat_start, 12) <= round(lat, 12) and round(line2_lat_end, 12) >= round(lat, 12))
-            
-        else:
-            lon = (line2_lat_start -line1_lat_start - line2_lon_start*slope2 + line1_lon_start*slope1)/(slope1-slope2)
-                
-            lat= line1_lat_start + (lon - line1_lon_start) * slope1
-
-        line1_lat_min = min(line1_lat_start, line1_lat_end)
-        line1_lat_max = max(line1_lat_start, line1_lat_end)
-        line1_lon_min = min(line1_lon_start, line1_lon_end)
-        line1_lon_max = max(line1_lon_start, line1_lon_end)
-        
-        line2_lat_min = min(line2_lat_start, line2_lat_end)
-        line2_lat_max = max(line2_lat_start, line2_lat_end)
-        line2_lon_min = min(line2_lon_start, line2_lon_end)
-        line2_lon_max = max(line2_lon_start, line2_lon_end)
-            
-        return (round(line2_lat_min, 12) <= round(lat, 12) and round(line2_lat_max, 12) >= round(lat, 12) and
-                round(line1_lat_min, 12) <= round(lat, 12) and round(line1_lat_max, 12) >= round(lat, 12)
+            else:
+                raise ValueError('float that is non a nan was returned from the ray_intersection')
+        elif ray_intersection_point == self:
+            if line1_lat_min == line_lat_max:
+                return (line2_lon_min <= line1_lon_max and line2_lon_max >= line1_lon_min)
+            else:
+                return (line2_lat_min <= line1_lat_max and line2_lat_max >= line1_lat_min)
+        elif isinstance(ray_intersection_point, tuple):
+            lat = round(ray_intersection_point[0], 12)
+            lon = round(ray_intersection_point[1], 12)
+            return (line2_lat_min <= lat and line2_lat_max >= lat and
+                line1_lat_min <= lat and line1_lat_max >= lat
                 and
-                round(line2_lon_min, 12) <= round(lon, 12) and round(line2_lon_max, 12) >= round(lon, 12) and
-                round(line1_lon_min, 12) <= round(lon, 12) and round(line1_lon_max, 12) >= round(lon, 12))
-        
+                line2_lon_min <= lon and line2_lon_max >= lon and
+                line1_lon_min <= lon and line1_lon_max >= lon)
+        else:
+            raise ValueError('unexpected value returned from ray_intersection')
             
     def find_sections(self):
         lat_start = self.start[0]
