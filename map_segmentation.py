@@ -197,4 +197,26 @@ if __name__ == '__main__':
         
     with open("E:\Downloads\Programming\map\dp_view_01.csv", newline='') as csvfile:
         csvreader = csv.reader(csvfile, delimiter=',', quotechar='"')
-        #for row in csvreader:
+        with open("E:\Downloads\Programming\map\mapped.sql", "w") as result_file:
+            result_file.truncate()
+            result_file.write("INSERT INTO line_sections (section_id, qline_id) VALUES\n")
+            for row in csvreader:
+                line_id = row[0]
+
+                lat_1 = float(row[1])
+                lon_1 = float(row[2])
+                lat_2 = float(row[3])
+                lon_2 = float(row[4])
+
+                g_line = GeoLine((lat_1, lon_1), (lat_2, lon_2))
+                sections = g_line.find_sections()
+
+                for section in sections:
+                    section_lat = section[0]
+                    section_lon = section[1]
+
+                    section_key = '{0:.3f}-{1:.3f}'.format(section_lat, section_lon)
+                    section_id = sections_dict[section_key]
+
+                    file_line = '({0}, {1}),\n'.format(section_id, line_id)
+                    result_file.write(file_line)
