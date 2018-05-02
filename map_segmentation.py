@@ -43,8 +43,15 @@ class GeoLine:
         if math.isnan(slope2):
             line2_lon_const = True
             
-        if (line1_lon_const and line2_lon_const) or (slope1 == slope2):
-            if line1_lat_start == line2_lat_start:
+        if (round(slope1, 12) == round(slope2, 12)):
+            line1_lat_at_0 = round(self.lat(0), 12)
+            line2_lat_at_0 = round(line.lat(0), 12)
+            if line1_lat_at_0 == line2_lat_at_0:
+                return self
+            else:
+                return math.nan
+        elif (line1_lon_const and line2_lon_const):
+            if line1_lon_start == line2_lon_start:
                 return self
             else:
                 return math.nan
@@ -113,11 +120,11 @@ class GeoLine:
 
         if isinstance(ray_intersection_point, float):
             if math.isnan(ray_intersection_point):
-                return false
+                return False
             else:
                 raise ValueError('float that is non a nan was returned from the ray_intersection')
         elif ray_intersection_point == self:
-            if line1_lat_min == line_lat_max:
+            if line1_lat_min == line1_lat_max:
                 return (line2_lon_min <= line1_lon_max and line2_lon_max >= line1_lon_min)
             else:
                 return (line2_lat_min <= line1_lat_max and line2_lat_max >= line1_lat_min)
